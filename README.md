@@ -18,7 +18,7 @@ ssh username@192.168.1.xxx
 6. Within the terminal, get the two files you need:
 Get the check if wifi connected script:
  ```
-curl https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh;
+curl https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh > /usr/local/bin/check_wifi.sh;
 sudo chmod +x /usr/local/bin/check_wifi.sh
 ```
 Get the check if wifi connected check service file:

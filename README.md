@@ -18,12 +18,12 @@ ssh username@192.168.1.xxx
 6. Within the terminal, get the two files you need:
 Get the check if wifi connected script:
  ```
-curl https://raw.githubusercontent.com/PeterJBurke/CreateSITLenv/main/setup.sh > /usr/local/bin/check_wifi.sh;
+curl https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh;
 sudo chmod +x /usr/local/bin/check_wifi.sh
 ```
 Get the check if wifi connected check service file:
  ```
-curl https://raw.githubusercontent.com/PeterJBurke/CreateSITLenv/main/setup.sh > /etc/systemd/system/check_wifi.service
+curl https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service > /etc/systemd/system/check_wifi.service
 ```
    
 11. Edit the check_wifi.sh file to enter you SSID name(s). And the name you want for your WiFi hotspot and pwd if no SSID can be connected to. After editing, press control x and click yes to save and exit.

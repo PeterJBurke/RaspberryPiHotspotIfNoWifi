@@ -1,0 +1,18 @@
+[Unit]
+Description=Check Wi-Fi Connection and Enable Hotspot if Disconnected
+After=network.target
+Wants=network-online.target
+After=NetworkManager.service
+After=NetworkManager-dispatcher.service
+After=NetworkManager-wait-online.service
+#Requires=wlan0.device
+
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/check_wifi.sh
+RemainAfterExit=yes
+User=root
+
+[Install]
+WantedBy=multi-user.target

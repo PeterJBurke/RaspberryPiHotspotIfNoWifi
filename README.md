@@ -23,7 +23,7 @@ sudo chmod +x /usr/local/bin/check_wifi.sh
 ```
 Get the check if wifi connected check service file:
  ```
-sudo curl https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service > /etc/systemd/system/check_wifi.service
+sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null
 ```
    
 11. Edit the check_wifi.sh file to enter you SSID name(s). And the name you want for your WiFi hotspot and pwd if no SSID can be connected to. After editing, press control x and click yes to save and exit.

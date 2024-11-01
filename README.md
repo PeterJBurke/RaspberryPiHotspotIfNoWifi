@@ -1,5 +1,5 @@
 # RaspberryPiHotspotIfNoWifi
-How to configure Raspberry Pi to Hake a hotspot if it fails to connect to WiFi.
+How to configure Raspberry Pi to make a hotspot if it fails to connect to WiFi.
 This works on Raspbian "Bookworm" and Raspberry Pi Zero 2 W. It should work on other models also (untested).
 If you follow these directions, it will work headless (i.e. you won't need to use an external keyboard an monitor, you can just ssh in).
 

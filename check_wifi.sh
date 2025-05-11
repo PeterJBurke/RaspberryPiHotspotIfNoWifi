@@ -107,7 +107,9 @@ else
                 nmcli connection delete "$prof"
             done
         fi
-        nmcli dev wifi connect "$ssid" password "$pass" ifname "$WIFI_IFACE" >/dev/null 2>&1
+        # Use a unique connection name to force nmcli to use the provided password
+        unique_con_name="temp-${ssid}-$(date +%s)"
+        nmcli dev wifi connect "$ssid" password "$pass" ifname "$WIFI_IFACE" name "$unique_con_name" >/dev/null 2>&1
         sleep 7
         # Check if connected
         new_ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes' | cut -d':' -f2)

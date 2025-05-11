@@ -94,6 +94,11 @@ else
         ssid="${!ssid_var}"
         pass="${!pass_var}"
         log "Trying to connect to SSID '$ssid'..."
+        # Delete any existing connection profile for this SSID to ensure password is updated
+        if nmcli connection show "$ssid" >/dev/null 2>&1; then
+            log "Deleting existing NetworkManager profile for '$ssid' to update password."
+            nmcli connection delete "$ssid"
+        fi
         nmcli dev wifi connect "$ssid" password "$pass" ifname "$WIFI_IFACE" >/dev/null 2>&1
         sleep 7
         # Check if connected

@@ -27,6 +27,7 @@ Automatically create a WiFi hotspot on your Raspberry Pi if it fails to connect 
    # Set DESIRED_SSID1, DESIRED_SSID1_PASSWORD, etc.
    # Set HOTSPOT_SSID and HOTSPOT_PASSWORD
    ```
+   After editing in nano, press **Ctrl+X** to exit, then type **Y** to confirm saving, and press **Enter** to keep the default filename.
 5. **Enable the service**:
    ```sh
    sudo systemctl enable check_wifi.service

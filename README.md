@@ -1,46 +1,97 @@
 # RaspberryPiHotspotIfNoWifi
-How to configure Raspberry Pi to make a hotspot if it fails to connect to WiFi.
-This works on Raspbian "Bookworm" and Raspberry Pi Zero 2 W. It should work on other models also (untested).
-If you follow these directions, it will work headless (i.e. you won't need to use an external keyboard an monitor, you can just ssh in).
 
-Steps:
-1. Install stock Raspbian "Bookworm" to an SD card. Make sure to use the options to enable ssh, and to have the local WiFi SSID and pwd burned to the card. Use website [link](https://www.raspberrypi.com/software/), download "Raspberry Pi Imager", and run it. Configure also the hostname and the username/pwd.
-2. Insert SD card into Pi, and boot it up. Wait 10 minutes for the initial disk unpacking.
-3. Find the IP address from your WiFi router (usually it is something like 192.168.1.xxx, where xxx is from 2 to 256). Or you can try hostname.local.
-Try:
- ```
-ssh username@hostname.local
-```
-Or:
- ```
-ssh username@192.168.1.xxx
-```
-6. Within the terminal, get the two files you need:
-Get the check if wifi connected script:
- ```
-sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh | sudo tee /usr/local/bin/check_wifi.sh > /dev/null;
-sudo chmod +x /usr/local/bin/check_wifi.sh
-```
-Get the check if wifi connected check service file:
- ```
-sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null
-```
-   
-11. Edit the check_wifi.sh file to enter you SSID name(s). And the name you want for your WiFi hotspot and pwd if no SSID can be connected to. After editing, press control x and click yes to save and exit. Note: You HAVE to edit this file manually to enter the SSIDs, even if you already configured the SSID in the Raspbian Imager program when you flashed the OS to the SD card.
-```
-sudo nano /usr/local/bin/check_wifi.sh
-```
-13. Enable the service with
-```
-sudo systemctl enable check_wifi.service
-```
-16. Reboot the machine with
-```
-sudo reboot now
-```
-18. If you are on your local net, it should work as before.
-19. If it creates a hotspot, connect to it with your WiFi on your laptop or smart phone/tablet. Then you can ssh to the default host IP address  as
-```
-ssh username@10.42.0.1
-```
+Automatically create a WiFi hotspot on your Raspberry Pi if it fails to connect to any of your preferred WiFi networks. Works on Raspbian "Bookworm" and Raspberry Pi Zero 2 W (should work on other models as well).
 
+## Features
+- Tries to connect to up to three specified WiFi networks (each with its own password).
+- If none connect, automatically creates a WiFi hotspot using NetworkManager.
+- Designed for headless setup (no monitor/keyboard required).
+
+## Setup Steps
+1. **Install Raspbian**: Flash Raspbian "Bookworm" to an SD card. Enable SSH and configure a username/password. [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+2. **Boot and SSH**: Insert SD card into Pi, boot, and wait ~10 minutes for setup. Find its IP from your router or try:
+   ```sh
+   ssh username@hostname.local
+   # or
+   ssh username@192.168.1.xxx
+   ```
+3. **Download the scripts**:
+   ```sh
+   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh | sudo tee /usr/local/bin/check_wifi.sh > /dev/null
+   sudo chmod +x /usr/local/bin/check_wifi.sh
+   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null
+   ```
+4. **Edit `check_wifi.sh`**: Open the script and configure your WiFi SSIDs and passwords, and your hotspot SSID/password.
+   ```sh
+   sudo nano /usr/local/bin/check_wifi.sh
+   # Set DESIRED_SSID1, DESIRED_SSID1_PASSWORD, etc.
+   # Set HOTSPOT_SSID and HOTSPOT_PASSWORD
+   ```
+5. **Enable the service**:
+   ```sh
+   sudo systemctl enable check_wifi.service
+   sudo systemctl start check_wifi.service
+   ```
+6. **Reboot**:
+   ```sh
+   sudo reboot now
+   ```
+7. **Usage**:
+   - If Pi connects to your WiFi: use as normal.
+   - If not, it will create a hotspot (default IP: 10.42.0.1). Connect to this from your device and SSH in:
+     ```sh
+     ssh username@10.42.0.1
+     ```
+
+## How It Works
+- The script checks if the Pi is connected to any of the three specified SSIDs.
+- If not, it tries to connect to each SSID in order, using its password.
+- If all fail, it creates a hotspot using NetworkManager.
+
+## Troubleshooting
+- **NetworkManager must be installed and manage your WiFi interface.**
+  - Install with: `sudo apt install network-manager`
+  - Disable dhcpcd if needed: `sudo systemctl disable dhcpcd`
+- **Your WiFi adapter must support AP (Access Point) mode.**
+- **Check script logs**:
+  - The script logs to stdout/stderr. If run as a service, check logs with:
+    ```sh
+    sudo journalctl -u check_wifi.service -f
+    ```
+- **Check NetworkManager logs**:
+    ```sh
+    sudo journalctl -u NetworkManager -f
+    ```
+- **Check WiFi status**:
+    ```sh
+    nmcli device status
+    nmcli connection show
+    nmcli device wifi list
+    ```
+- **Debug connection attempts**:
+    - Try connecting manually:
+      ```sh
+      sudo nmcli dev wifi connect "SSID" password "PASSWORD" ifname wlan0
+      ```
+- **Hotspot doesn’t start?**
+    - Make sure no other connection is active on the WiFi interface.
+    - Try bringing down existing connections:
+      ```sh
+      sudo nmcli con down id <connection_name>
+      ```
+    - Delete old hotspot profiles if needed:
+      ```sh
+      sudo nmcli con delete id <connection_name>
+      ```
+- **Permissions**: Script must be run as root (sudo).
+
+## Customization
+- Change the number of SSIDs by editing the script and adding/removing DESIRED_SSID/PASSWORD pairs.
+- Adjust hotspot SSID/password as desired.
+
+## Credits
+- Inspired by community solutions for Raspberry Pi WiFi fallback and hotspot automation.
+
+---
+
+If you encounter issues, please open an issue on the GitHub repository.

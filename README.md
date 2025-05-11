@@ -17,9 +17,9 @@ Automatically create a WiFi hotspot on your Raspberry Pi if it fails to connect 
    ```
 3. **Download the scripts**:
    ```sh
-   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh | sudo tee /usr/local/bin/check_wifi.sh > /dev/null
+   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.sh | sudo tee /usr/local/bin/check_wifi.sh > /dev/null  # Overwrites if file exists
    sudo chmod +x /usr/local/bin/check_wifi.sh
-   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null
+   sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null  # Overwrites if file exists
    ```
 4. **Edit `check_wifi.sh`**: Open the script and configure your WiFi SSIDs and passwords, and your hotspot SSID/password.
    ```sh

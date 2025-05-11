@@ -26,8 +26,11 @@
 # Add or remove SSIDs as needed.
 # Example: DESIRED_SSIDS=("MyHomeNetwork" "WorkNetwork" "AnotherNetwork")
 DESIRED_SSID1="Network_1"
+DESIRED_SSID1_PASSWORD="password1"
 DESIRED_SSID2="Network_2"
+DESIRED_SSID2_PASSWORD="password2"
 DESIRED_SSID3="Network_3"
+DESIRED_SSID3_PASSWORD="password3"
 
 # Hotspot Configuration (when no DESIRED_SSID is connected)
 HOTSPOT_SSID="PiHotspotNM"        # SSID for the NetworkManager hotspot.
@@ -63,8 +66,12 @@ check_root
 check_nmcli
 
 # Validate configuration
-if [ ${#DESIRED_SSIDS[@]} -eq 0 ]; then
-    log "ERROR: DESIRED_SSIDS array is empty. Please configure at least one target SSID."
+if [ -z "$DESIRED_SSID1" ] || [ -z "$DESIRED_SSID2" ] || [ -z "$DESIRED_SSID3" ]; then
+    log "ERROR: Please configure all three DESIRED_SSID variables."
+    exit 1
+fi
+if [ -z "$DESIRED_SSID1_PASSWORD" ] || [ -z "$DESIRED_SSID2_PASSWORD" ] || [ -z "$DESIRED_SSID3_PASSWORD" ]; then
+    log "ERROR: Please configure all three DESIRED_SSID passwords."
     exit 1
 fi
 if [ ${#HOTSPOT_PASSWORD} -lt 8 ]; then
@@ -74,53 +81,39 @@ fi
 
 log "Checking current WiFi connection for desired SSIDs..."
 
-# Get the currently connected SSID using nmcli.
-# -t for terse output, -f for fields ACTIVE and SSID, dev wifi for wifi devices.
-# grep '^yes' filters for active connections.
-# cut -d':' -f2 extracts the SSID part.
 current_ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes' | cut -d':' -f2)
 
-connected_to_desired=false
-if [ -n "$current_ssid" ]; then # Check if current_ssid is not empty
-    for desired_ssid_item in "${DESIRED_SSIDS[@]}"; do
-        if [ "$current_ssid" == "$desired_ssid_item" ]; then
-            log "SUCCESS: Currently connected to desired SSID '$current_ssid'."
-            connected_to_desired=true
-            break
-        fi
-    done
-fi
-
-if $connected_to_desired; then
+if [[ "$current_ssid" == "$DESIRED_SSID1" || "$current_ssid" == "$DESIRED_SSID2" || "$current_ssid" == "$DESIRED_SSID3" ]]; then
+    log "SUCCESS: Currently connected to desired SSID '$current_ssid'."
     exit 0
 else
-    if [ -n "$current_ssid" ]; then
-        log "INFO: Connected to '$current_ssid', which is not in the desired list."
-    else
-        log "INFO: Not connected to any WiFi network."
-    fi
-    log "Proceeding to configure and start a WiFi hotspot using nmcli."
+    log "Not connected to any desired SSID. Attempting to connect to each in order..."
+    for i in 1 2 3; do
+        ssid_var="DESIRED_SSID${i}"
+        pass_var="DESIRED_SSID${i}_PASSWORD"
+        ssid="${!ssid_var}"
+        pass="${!pass_var}"
+        log "Trying to connect to SSID '$ssid'..."
+        nmcli dev wifi connect "$ssid" password "$pass" ifname "$WIFI_IFACE" >/dev/null 2>&1
+        sleep 7
+        # Check if connected
+        new_ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes' | cut -d':' -f2)
+        if [ "$new_ssid" == "$ssid" ]; then
+            log "SUCCESS: Connected to '$ssid'."
+            exit 0
+        else
+            log "Failed to connect to '$ssid'."
+        fi
+    done
+    log "Could not connect to any desired SSID. Proceeding to create hotspot."
 fi
 
 # --- Start Hotspot Procedure using nmcli ---
 log "Attempting to start hotspot '$HOTSPOT_SSID' on interface $WIFI_IFACE..."
 
-# First, try to turn WiFi on if it's off, as hotspot creation might fail otherwise.
 log "Ensuring WiFi is enabled..."
 nmcli radio wifi on
 
-# Check if a hotspot with the same name is already configured.
-# If so, nmcli might just activate it or fail if parameters differ.
-# For simplicity, this script doesn't explicitly delete old hotspot connections,
-# but 'nmcli con down <hotspot_name>' and 'nmcli con delete <hotspot_name>' could be used.
-
-# Create and activate the hotspot.
-# 'nmcli device wifi hotspot' creates a new connection profile if one doesn't exist
-# with the given SSID, or reuses an existing one.
-# The 'ifname $WIFI_IFACE' part is optional but good for specifying the interface.
-# If you omit 'ifname $WIFI_IFACE', NetworkManager will pick a suitable WiFi interface.
-# The 'con-name' parameter gives a specific name to the connection profile created by nmcli.
-# This makes it easier to manage (e.g., 'nmcli con down MyPiHotspotConnection').
 HOTSPOT_CON_NAME="Hotspot-${HOTSPOT_SSID}" # A descriptive connection name
 
 log "Creating/Activating hotspot with SSID: '$HOTSPOT_SSID', Password: '********', Connection Name: '$HOTSPOT_CON_NAME'"

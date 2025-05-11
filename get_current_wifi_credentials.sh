@@ -15,7 +15,7 @@ echo "Current Wi-Fi SSID: $current_ssid"
 # Attempt to get the connection name associated with the active SSID.
 # Often, the connection name is the same as the SSID, but it can be different.
 # We'll find the active connection that matches the current_ssid.
-connection_name=$(nmcli -t -f NAME,DEVICE,ACTIVE,SSID con show --active | grep "$current_ssid" | grep ':yes:' | head -n 1 | cut -d':' -f1)
+connection_name=$(nmcli -t --fields NAME,802-11-WIRELESS.SSID c s --active | grep ":${current_ssid}$" | head -n 1 | cut -d':' -f1)
 
 if [ -z "$connection_name" ]; then
     echo "Warning: Could not automatically determine the NetworkManager connection name for SSID '$current_ssid'."

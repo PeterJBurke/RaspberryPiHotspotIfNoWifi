@@ -26,7 +26,7 @@ Get the check if wifi connected check service file:
 sudo curl -L https://raw.githubusercontent.com/PeterJBurke/RaspberryPiHotspotIfNoWifi/refs/heads/main/check_wifi.service | sudo tee /etc/systemd/system/check_wifi.service > /dev/null
 ```
    
-11. Edit the check_wifi.sh file to enter you SSID name(s). And the name you want for your WiFi hotspot and pwd if no SSID can be connected to. After editing, press control x and click yes to save and exit.
+11. Edit the check_wifi.sh file to enter you SSID name(s). And the name you want for your WiFi hotspot and pwd if no SSID can be connected to. After editing, press control x and click yes to save and exit. Note: You HAVE to edit this file manually to enter the SSIDs, even if you already configured the SSID in the Raspbian Imager program when you flashed the OS to the SD card.
 ```
 sudo nano /usr/local/bin/check_wifi.sh
 ```

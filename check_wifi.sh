@@ -25,7 +25,9 @@
 # List of desired SSIDs to check for an existing connection.
 # Add or remove SSIDs as needed.
 # Example: DESIRED_SSIDS=("MyHomeNetwork" "WorkNetwork" "AnotherNetwork")
-DESIRED_SSIDS=("Network_1" "Network_2" "Network_3")
+DESIRED_SSID1="Network_1"
+DESIRED_SSID2="Network_2"
+DESIRED_SSID3="Network_3"
 
 # Hotspot Configuration (when no DESIRED_SSID is connected)
 HOTSPOT_SSID="PiHotspotNM"        # SSID for the NetworkManager hotspot.

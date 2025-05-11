@@ -94,10 +94,18 @@ else
         ssid="${!ssid_var}"
         pass="${!pass_var}"
         log "Trying to connect to SSID '$ssid'..."
-        # Delete any existing connection profile for this SSID to ensure password is updated
-        if nmcli connection show "$ssid" >/dev/null 2>&1; then
-            log "Deleting existing NetworkManager profile for '$ssid' to update password."
-            nmcli connection delete "$ssid"
+        # Delete all existing connection profiles with this SSID to ensure password is updated
+        profile_ids=$(nmcli -t -f NAME,TYPE,UUID connection show | awk -F: '$2=="802-11-wireless"{print $1}' | while read -r name; do
+            ssid_match=$(nmcli -g 802-11-wireless.ssid connection show "$name" 2>/dev/null)
+            if [ "$ssid_match" = "$ssid" ]; then
+                echo "$name"
+            fi
+        done)
+        if [ -n "$profile_ids" ]; then
+            for prof in $profile_ids; do
+                log "Deleting existing NetworkManager profile '$prof' for SSID '$ssid' to update password."
+                nmcli connection delete "$prof"
+            done
         fi
         nmcli dev wifi connect "$ssid" password "$pass" ifname "$WIFI_IFACE" >/dev/null 2>&1
         sleep 7
